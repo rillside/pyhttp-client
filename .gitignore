@@ -1,0 +1,12 @@
+# Сборка PyInstaller
+build/
+dist/
+
+# Python
+__pycache__/
+.venv/
+venv/
+
+# IDE / ОС
+.vscode/
+.idea/

@@ -1,0 +1,51 @@
+name: Build Windows EXE
+
+# Собираем при пуше тега вида v1.0.0, а также вручную из вкладки Actions.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write   # нужно, чтобы workflow мог создать Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build (PyInstaller, onedir)
+        run: pyinstaller --noconfirm HttpClient.spec
+
+      - name: Package zip
+        run: Compress-Archive -Path dist/HttpClient/* -DestinationPath dist/HttpClient-windows.zip -Force
+        shell: pwsh
+
+      # Артефакт доступен для любой сборки (в т.ч. ручной)
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HttpClient-windows
+          path: dist/HttpClient-windows.zip
+
+      # Release создаётся только при пуше тега
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/HttpClient-windows.zip
+          generate_release_notes: true
