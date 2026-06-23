@@ -6,6 +6,7 @@ dist/
 __pycache__/
 .venv/
 venv/
+.pyc
 
 # IDE / ОС
 .vscode/
